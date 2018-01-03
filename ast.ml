@@ -1,6 +1,6 @@
-type program = ast list [@@deriving show]
+type program = instruction list [@@deriving show]
 
-and ast =
+and instruction =
   | Move of int
   | Add of int
   | Loop of program

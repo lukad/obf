@@ -1,15 +1,7 @@
 let main () =
-  let prog = [
-      Ast.Add(8);
-      Ast.Loop([
-            Ast.Move(1);
-            Ast.Add(8);
-            Ast.Move(-1);
-            Ast.Add(-1);
-        ])
-    ]
-  in
-  print_endline (Ast.show_program prog)
+  match Reader.read_string "++++++++[>++++++++<-]>." with
+  | Result.Ok v -> print_endline (Ast.show_program v)
+  | Result.Error msg -> print_endline msg
 ;;
 
 main()

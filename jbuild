@@ -3,5 +3,6 @@
 (executable
  ((name obf)
   (libraries (ppx_deriving.std
+              angstrom
               batteries))
-  (preprocess (pps (ppx_deriving.std)))))
+   (preprocess (pps (ppx_deriving.std)))))
