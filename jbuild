@@ -1,4 +1,7 @@
 (jbuild_version 1)
 
 (executable
- ((name obf)))
+ ((name obf)
+  (libraries (ppx_deriving.std
+              batteries))
+  (preprocess (pps (ppx_deriving.std)))))
