@@ -1,0 +1,19 @@
+opam-version: "1.2"
+name: "obf"
+version: "~unknown"
+maintainer: "Luka Dornhecker <luka.dornhecker@gmail.com>"
+authors: ["Luka Dornhecker <luka.dornhecker@gmail.com>"]
+homepage: "https://github.com/lukad/obf"
+bug-reports: "https://github.com/lukad/obf/issues"
+dev-repo: "git+https://github.com/lukad/obf.git"
+license: "MIT"
+build: [
+  ["jbuilder" "build" "--only" name "--root" "." "-j" jobs "@install"]
+]
+remove: ["ocamlfind" "remove" "obf"]
+depends: [
+  "ocamlfind" {build}
+  "jbuilder" {build}
+  "angstrom" {= "0.9.0"}
+  "ppx_deriving" {= "4.2.1"}
+]

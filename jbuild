@@ -5,3 +5,7 @@
   (libraries (ppx_deriving.std
               angstrom))
    (preprocess (pps (ppx_deriving.std)))))
+
+(install
+ ((section bin)
+  (files ((obf.exe as obf)))))
