@@ -3,8 +3,14 @@
 (executable
  ((name obf)
   (libraries (ppx_deriving.std
-              angstrom))
-   (preprocess (pps (ppx_deriving.std)))))
+              angstrom
+              ctypes
+              llvm
+              llvm.analysis
+              llvm.all_backends
+              llvm.executionengine
+              llvm.scalar_opts))
+  (preprocess (pps (ppx_deriving.std)))))
 
 (install
  ((section bin)
