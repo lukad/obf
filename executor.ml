@@ -39,6 +39,8 @@ let generate program =
   Llvm_analysis.assert_valid_module bfmod;
   bfmod
 
+let show_module = Llvm.string_of_llmodule
+
 let run program =
   ExecutionEngine.initialize () |> ignore;
   let bfmod = generate program in

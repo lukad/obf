@@ -10,7 +10,8 @@
               llvm.all_backends
               llvm.executionengine
               llvm.scalar_opts))
-  (preprocess (pps (ppx_deriving.std)))))
+  (preprocess (pps (ppx_deriving.std
+                    ppx_deriving_argparse)))))
 
 (install
  ((section bin)
