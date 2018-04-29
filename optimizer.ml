@@ -7,7 +7,7 @@ let rec opt = function
   | Move 0 :: rest -> opt rest
 
   | Add a  :: Add b  :: rest -> Add (a + b) :: opt rest
-  | Move a :: Move b :: rest -> Add (a + b) :: opt rest
+  | Move a :: Move b :: rest -> Move (a + b) :: opt rest
 
   | Loop []   :: rest ->                    opt rest
   | Loop body :: rest -> Loop (opt body) :: opt rest
