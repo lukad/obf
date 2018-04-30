@@ -1,11 +1,23 @@
+type emit = Llvm | Ast | None [@@deriving show]
+
+let parse_emit = function
+  | "llvm" -> Llvm
+  | "ast" -> Ast
+  | s -> raise (Invalid_argument s)
+
+let show_emit = function
+  | Llvm -> "llvm"
+  | Ast -> "ast"
+  | None -> "none"
+
 type t = {
-    emit_llvm : bool [@set_true]
+    emit : emit [@print show_emit] [@parse parse_emit];
   } [@@deriving show, argparse {
     positional = ["program", "Brainfuck program"]
-  }]
+  }];;
 
 let default = {
-    emit_llvm = false;
+    emit = None;
   }
 
 let read_file f =
@@ -27,16 +39,15 @@ let parse_program file =
 let main () =
   let cfg, rest = argparse default "obf" Sys.argv in
 
-  ignore cfg;
-
   let program =
     match parse_program rest.(0) with
     | Some program -> program
     | None -> exit 1
   in
 
-  match cfg.emit_llvm with
-  | false -> Executor.run program
-  | true -> Executor.generate program |> Executor.show_module |> print_endline
+  match cfg.emit with
+  | None -> Executor.run program
+  | Llvm -> Executor.generate program |> Executor.show_module |> print_endline
+  | Ast -> Ast.show_program program |> print_endline
 
 let () = main ()
