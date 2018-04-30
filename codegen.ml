@@ -67,6 +67,10 @@ let gen program =
        let result = Llvm.build_add value (cell_value i) "add_result" !builder in
        Llvm.build_store result index !builder |> ignore
 
+    | Ast.Set i ->
+       let index = Llvm.build_load ptr "index" !builder in
+       Llvm.build_store (cell_value i) index !builder |> ignore
+
     | Ast.Read ->
        let input = Llvm.build_call read [||] "" !builder in
        let truncated = Llvm.build_trunc input cell_type "" !builder in

@@ -9,7 +9,7 @@ open Foreign
 let generate program =
   Llvm.enable_pretty_stacktrace ();
   Llvm_all_backends.initialize ();
-  let bfmod = program |> Optimizer.optimize |> Codegen.gen in
+  let bfmod = program |> Codegen.gen in
 
   let fpm = PassManager.create_function bfmod in
   PassManager.initialize fpm |> ignore;

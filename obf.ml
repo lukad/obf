@@ -41,7 +41,7 @@ let main () =
 
   let program =
     match parse_program rest.(0) with
-    | Some program -> program
+    | Some program -> program |> Optimizer.optimize
     | None -> exit 1
   in
 
