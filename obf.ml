@@ -5,16 +5,17 @@ let parse_emit = function
   | "ast" -> Ast
   | s -> raise (Invalid_argument s)
 
-let show_emit = function
+let _show_emit = function
   | Llvm -> "llvm"
   | Ast -> "ast"
   | None -> "none"
 
 type t = {
-    emit : emit [@print show_emit] [@parse parse_emit];
+    emit : emit [@print _show_emit] [@parse parse_emit] [@short "-e"]
+    (** Emit code: llvm, ast **);
   } [@@deriving show, argparse {
     positional = ["program", "Brainfuck program"]
-  }];;
+  }]
 
 let default = {
     emit = None;
