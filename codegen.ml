@@ -39,10 +39,6 @@ let gen program =
   let write = write jit_module in
   let calloc = calloc jit_module in
   let free = free jit_module in
-  ignore free;
-  ignore calloc;
-  ignore read;
-  ignore write;
 
   let main_type = Llvm.function_type (Llvm.void_type context) [||] in
   let main = Llvm.declare_function "main" main_type jit_module in
@@ -50,63 +46,72 @@ let gen program =
   let block = ref (Llvm.append_block context "" main) in
   let builder = ref (Llvm.builder_at_end context !block) in
 
-  let ptr = Llvm.build_alloca (Llvm.pointer_type cell_type) "ptr" !builder in
-  let data_ptr = Llvm.build_call calloc [|int 64 tape_size; int 64 1|] "data_ptr" !builder in
-
-  Llvm.build_store data_ptr ptr !builder |> ignore;
+  let tape = Llvm.build_call calloc [|int 64 tape_size; int 64 1|] "tape" !builder in
+  let head = ref tape in
 
   let rec gen_ins = function
     | Ast.Move i ->
-       let index = Llvm.build_load ptr "index" !builder in
-       let new_index = Llvm.build_gep index [|index_value i|] "new_index" !builder in
-       Llvm.build_store new_index ptr !builder |> ignore
-
+       head := Llvm.build_gep !head [|cell_value i|] "head" !builder
     | Ast.Add i ->
-       let index = Llvm.build_load ptr "index" !builder in
-       let value = Llvm.build_load index "value" !builder in
-       let result = Llvm.build_add value (cell_value i) "add_result" !builder in
-       Llvm.build_store result index !builder |> ignore
-
+       let head_value = Llvm.build_load !head "head_value" !builder in
+       let result = Llvm.build_add head_value (cell_value i) "add_result" !builder in
+       Llvm.build_store result !head !builder |> ignore
     | Ast.Set i ->
-       let index = Llvm.build_load ptr "index" !builder in
-       Llvm.build_store (cell_value i) index !builder |> ignore
-
+       Llvm.build_store (cell_value i) !head !builder |> ignore
     | Ast.Read ->
-       let input = Llvm.build_call read [||] "" !builder in
-       let truncated = Llvm.build_trunc input cell_type "" !builder in
-       let index = Llvm.build_load ptr "" !builder in
-       Llvm.build_store truncated index !builder |> ignore
-
+       let input = Llvm.build_call read [||] "input" !builder in
+       let truncated = Llvm.build_trunc input cell_type "truncated" !builder in
+       Llvm.build_store truncated !head !builder |> ignore
     | Ast.Write ->
-       let index = Llvm.build_load ptr "" !builder in
-       let value = Llvm.build_load index "" !builder in
-       let extended = Llvm.build_sext value (int_t 32) "" !builder in
+       let head_value = Llvm.build_load !head "output" !builder in
+       let extended = Llvm.build_sext head_value (int_t 32) "extended" !builder in
        Llvm.build_call write [|extended|] "" !builder |> ignore
-
     | Ast.Loop(body) ->
-       let condition_block = Llvm.append_block context "condition" main in
        let body_block = Llvm.append_block context "body" main in
        let after_block = Llvm.append_block context "after" main in
 
-       Llvm.build_br condition_block !builder |> ignore;
+       let before_value = !head in
+       let before_block = Llvm.insertion_block !builder in
 
-       builder := Llvm.builder_at_end context condition_block;
-
-       let index = Llvm.build_load ptr "" !builder in
-       let value = Llvm.build_load index "" !builder in
-
-       let condition = Llvm.build_is_not_null value "" !builder in
+       let head_value = Llvm.build_load !head "head_value" !builder in
+       let condition = Llvm.build_is_not_null head_value "" !builder in
        Llvm.build_cond_br condition body_block after_block !builder |> ignore;
 
-       builder := Llvm.builder_at_end context body_block;
+       let body_builder = Llvm.builder_at_end context body_block in
+       builder := body_builder;
+
+       let incoming = [(before_value, before_block)] in
+       let phi = Llvm.build_phi incoming "body_phi" body_builder in
+
+       head := phi;
+
        List.iter gen_ins body |> ignore;
 
-       Llvm.build_br condition_block !builder |> ignore;
+       let end_block = Llvm.insertion_block !builder in
+       let end_value = !head in
+
+       let head_value = Llvm.build_load !head "head_value" !builder in
+       let condition = Llvm.build_is_not_null head_value "" !builder in
+       Llvm.build_cond_br condition body_block after_block !builder |> ignore;
+       Llvm.add_incoming (end_value, end_block) phi |> ignore;
 
        builder := Llvm.builder_at_end context after_block;
+
+       let incoming =
+         [
+           (before_value, before_block);
+           (end_value, end_block)
+         ] in
+       let after_phi = Llvm.build_phi incoming "after_phi" !builder in
+
+       head := after_phi;
+
+       ignore ()
   in
 
   List.iter gen_ins program;
+
+  Llvm.build_call free [|tape|] "" !builder |> ignore;
   Llvm.build_ret_void !builder |> ignore;
 
   jit_module
