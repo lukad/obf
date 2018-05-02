@@ -1,13 +1,19 @@
-type emit = Llvm | Ast | None [@@deriving show]
+open Llvm_target
+
+type emit = Llvm | Ast | Asm | Object | None [@@deriving show]
 
 let parse_emit = function
   | "llvm" -> Llvm
   | "ast" -> Ast
+  | "asm" -> Asm
+  | "obj" -> Object
   | s -> raise (Invalid_argument s)
 
 let _show_emit = function
   | Llvm -> "llvm"
   | Ast -> "ast"
+  | Asm -> "asm"
+  | Object -> "obj"
   | None -> "none"
 
 type t = {
@@ -37,6 +43,15 @@ let parse_program file =
      print_endline msg;
      None
 
+let emit_machine_code program codegen_type =
+  Llvm_all_backends.initialize ();
+  let default_triple = Target.default_triple () in
+  let target = Target.by_triple default_triple in
+  let target_machine = TargetMachine.create default_triple target in
+  let llmodule = Executor.generate program in
+  let buffer = TargetMachine.emit_to_memory_buffer llmodule codegen_type target_machine in
+  Llvm.MemoryBuffer.as_string buffer
+
 let main () =
   let cfg, rest = argparse default "obf" Sys.argv in
 
@@ -50,5 +65,7 @@ let main () =
   | None -> Executor.run program
   | Llvm -> Executor.generate program |> Executor.show_module |> print_endline
   | Ast -> Ast.show_program program |> print_endline
+  | Asm -> emit_machine_code program CodeGenFileType.AssemblyFile |> print_endline
+  | Object -> emit_machine_code program CodeGenFileType.ObjectFile |> print_endline
 
 let () = main ()
