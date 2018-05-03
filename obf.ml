@@ -18,7 +18,7 @@ let _show_emit = function
 
 type t = {
     emit : emit [@print _show_emit] [@parse parse_emit] [@short "-e"]
-    (** Emit code: llvm, ast **);
+    (** Emit generated code to stdout: llvm, ast, asm, obj **);
   } [@@deriving show, argparse {
     positional = ["program", "Brainfuck program"]
   }]
