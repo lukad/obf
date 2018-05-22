@@ -2,6 +2,10 @@
 
 `obf` is a Brainfuck interpreter using [Llvm](https://llvm.org/).
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/179731.png)](https://asciinema.org/a/179731)
+
 ## Installing
 
 ### Prerequesites
