@@ -9,7 +9,8 @@
               llvm.analysis
               llvm.all_backends
               llvm.executionengine
-              llvm.scalar_opts))
+              llvm.scalar_opts
+              llvm.target))
   (preprocess (pps (ppx_deriving.std
                     ppx_deriving_argparse)))))
 
