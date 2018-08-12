@@ -13,7 +13,7 @@ build: [
 remove: ["ocamlfind" "remove" "obf"]
 depends: [
   "ocamlfind" {build}
-  "jbuilder" {build}
+  "dune" {build}
   "angstrom" {= "0.9.0"}
   "ppx_deriving" {= "4.2.1"}
   "ppx_deriving_argparse" {= "0.0.5"}
