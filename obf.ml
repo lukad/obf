@@ -47,7 +47,7 @@ let emit_machine_code program codegen_type =
   Llvm_all_backends.initialize ();
   let default_triple = Target.default_triple () in
   let target = Target.by_triple default_triple in
-  let target_machine = TargetMachine.create default_triple target in
+  let target_machine = TargetMachine.create ~triple:default_triple target in
   let llmodule = Executor.generate program in
   let buffer = TargetMachine.emit_to_memory_buffer llmodule codegen_type target_machine in
   Llvm.MemoryBuffer.as_string buffer
