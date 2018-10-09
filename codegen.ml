@@ -1,5 +1,3 @@
-module PassManager = Llvm.PassManager
-
 let context = Llvm.global_context ()
 
 let tape_size = 30000
