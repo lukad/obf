@@ -8,7 +8,7 @@ bug-reports: "https://github.com/lukad/obf/issues"
 dev-repo: "git+https://github.com/lukad/obf.git"
 license: "MIT"
 build: [
-  ["jbuilder" "build" "--only" name "--root" "." "-j" jobs "@install"]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 remove: ["ocamlfind" "remove" "obf"]
 depends: [
